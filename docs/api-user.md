@@ -49,6 +49,111 @@
 }
 ```
 
+# AppLoginByMobile
+
+纯短信验证码登录（免密码），逆向自网页端 pan.wo.cn 登录页「短信登录」页签（2026-11-06）。
+先用 [sendMessageCodeBase](#sendmessagecodebase) 发送短信，再凭收到的验证码调用本接口换取 token。
+
+### Req
+
+```json
+{
+  "header": {
+    "key": "AppLoginByMobile",
+    "resTime": 1762400000000,
+    "reqSeq": 123456,
+    "channel": "api-user",
+    "sign": "<md5(key+resTime+reqSeq+channel+version)>",
+    "version": ""
+  },
+  "body": {
+    "param": "<AES加密>",
+    "clientId": "1001000021",
+    "secret": true
+  }
+}
+```
+
+#### param
+
+```json
+{
+  "phone": "186****5244",
+  "smsCode": "123456",
+  "clientSecret": "XFmi9GS2hzk98jGX"
+}
+```
+
+注意字段名是 `smsCode`（区别于 PcLoginVerifyCode 的 `messageCode`）。
+
+### Resp
+
+```json
+{
+  "STATUS": "200",
+  "MSG": "服务调用成功！",
+  "LOGID": "...",
+  "RSP": {
+    "RSP_CODE": "0000",
+    "RSP_DESC": "成功",
+    "DATA": {
+      "access_token": "<uuid>",
+      "refresh_token": "<uuid，是否返回待真机确认>",
+      "expires_in": 604799
+    }
+  }
+}
+```
+
+网页端只取 `access_token`；`refresh_token`/`expires_in` 实际返回情况需真机验证。
+
+# sendMessageCodeBase
+
+发送短信登录验证码。**独立端点，非 dispatcher 协议**（无 header/sign）。
+
+### Req
+
+```
+POST https://panservice.mail.wo.cn/api-user/sendMessageCodeBase
+Content-Type: application/json
+Origin: https://pan.wo.cn
+Referer: https://pan.wo.cn/
+```
+
+```json
+{
+  "func": "pc_send",
+  "clientId": "1001000021",
+  "param": "<AES加密>"
+}
+```
+
+#### param 明文（api-user 通道 AES 加密前）
+
+```json
+{
+  "operateType": "1",
+  "phone": "186****5244",
+  "uuid": "",
+  "verifyCode": ""
+}
+```
+
+`uuid`/`verifyCode` 为图形验证码对，仅风控触发时必填；正常传空串。
+图形验证码图片：`GET https://panservice.mail.wo.cn/api-user/getverifycode?uuid=<uuid>`。
+
+### Resp
+
+```json
+{ "STATUS": "200", "MSG": "服务调用成功！", "RSP": { "RSP_CODE": "0000", "RSP_DESC": "成功" } }
+```
+
+| RSP_CODE | 含义 | SDK 行为 |
+|---|---|---|
+| `0000` | 发送成功 | `NeedCaptcha=false` |
+| `6006` | 需要图形验证码（`DATA.isNeedVerfyCode==1`） | `NeedCaptcha=true` |
+| `6007` | 图形验证码错误 | `NeedCaptcha=true` |
+
 # PcLoginVerifyCode
 
 ### Req

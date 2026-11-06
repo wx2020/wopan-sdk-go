@@ -31,6 +31,7 @@ const (
 const (
 	KeyPcWebLogin        = "PcWebLogin"
 	KeyPcLoginVerifyCode = "PcLoginVerifyCode"
+	KeyAppLoginByMobile  = "AppLoginByMobile"
 	KeyAppQueryUser      = "AppQueryUser"
 	KeyAppRefreshToken   = "AppRefreshToken"
 	KeyAppLogout         = "AppLogout"

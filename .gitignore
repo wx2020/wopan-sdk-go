@@ -22,3 +22,7 @@ go.work
 
 # ide files
 .idea/
+
+# local memory & scratch
+AGENTS.md
+.tmp/
